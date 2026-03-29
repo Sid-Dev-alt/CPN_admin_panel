@@ -1,0 +1,45 @@
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git config user.email "sidk4@example.com" 
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git config user.name "Sid" 
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git init 
+Initialized empty Git repository in C:/Users/sidk4/work_Docs/DW/cpn foods/cpn-admin/.git/
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git add . 
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'eslint.config.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'public/icons.svg', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'setup_admin.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/App.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/App.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/assets/vite.svg', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/index.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'vite.config.js', LF will be replaced by CRLF the next time Git touches it
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git commit -m "Initialize standalone CPN_admin_panel repository" 
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'sidk4@Siddd.(none)')
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git remote add origin https://github.com/Sid-Dev-alt/CPN_admin_panel.git   || git remote set-url origin https://github.com/Sid-Dev-alt/CPN_admin_panel.git 
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git branch -M main 
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git push -f origin main 
+error: src refspec main does not match any
+error: failed to push some refs to 'https://github.com/Sid-Dev-alt/CPN_admin_panel.git'
