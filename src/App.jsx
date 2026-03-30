@@ -110,7 +110,8 @@ function App() {
   return (
     <div className="bg-light min-vh-100 pb-5">
       <nav className="navbar navbar-dark bg-dark shadow-sm px-4 mb-4">
-        <span className="navbar-brand fw-bold mb-0 h1">CPN Foods Administrator Control Panel</span>
+        <span className="navbar-brand fw-bold mb-0 h1">CPN Foods Admin Panel</span>
+
       </nav>
 
       {/* Expanded fluid container for full width */}
@@ -217,7 +218,7 @@ function App() {
                       <div className="col-8 p-3 d-flex flex-column">
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <h6 className="fw-bold text-dark m-0">{p.name}</h6>
-                          <button onClick={() => handleDelete(p.id)} className="btn btn-sm btn-outline-danger shadow-sm rounded-1 p-1 px-2 border-0" title="Delete Product">
+                          <button onClick={() => handleDelete(p.id)} className="btn btn-sm  btn-outline-danger shadow-sm rounded-1 p-1 px-2 border-0" title="Delete Product">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash3-fill" viewBox="0 0 16 16">
                               <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
@@ -226,7 +227,7 @@ function App() {
                         <p className="small text-muted mb-3 lh-sm" style={{flex: 1}}>{p.subtitle || 'No subtitle provided'}</p>
                         <div className="d-flex align-items-center gap-2 mt-auto">
                           <span className="badge bg-danger shadow-sm">Spice: {p.tasteProfile?.spice || 0}/5</span>
-                          <span className="badge bg-success shadow-sm">₹{p.variants[0]?.price}</span>
+                          <span className="badge bg-success shadow-sm">₹{p.variants?.[0]?.price || 0}</span>
                         </div>
                       </div>
                     </div>

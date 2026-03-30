@@ -1,0 +1,42 @@
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git init 
+Reinitialized existing Git repository in C:/Users/sidk4/work_Docs/DW/cpn foods/cpn-admin/.git/
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git config user.email "sidk4@example.com" 
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git config user.name "Sid" 
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git add . 
+warning: in the working copy of 'setup_admin.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'setup_admin_output.txt', LF will be replaced by CRLF the next time Git touches it
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git commit -m "Initialize standalone CPN_admin_panel repository" 
+[main (root-commit) 722728b] Initialize standalone CPN_admin_panel repository
+ 18 files changed, 475 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+ create mode 100644 eslint.config.js
+ create mode 100644 index.html
+ create mode 100644 package.json
+ create mode 100644 public/favicon.svg
+ create mode 100644 public/icons.svg
+ create mode 100644 setup_admin.bat
+ create mode 100644 setup_admin_output.txt
+ create mode 100644 setup_admin_output_final.txt
+ create mode 100644 src/App.css
+ create mode 100644 src/App.jsx
+ create mode 100644 src/assets/hero.png
+ create mode 100644 src/assets/react.svg
+ create mode 100644 src/assets/vite.svg
+ create mode 100644 src/index.css
+ create mode 100644 src/main.jsx
+ create mode 100644 vite.config.js
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git remote add origin https://github.com/Sid-Dev-alt/CPN_admin_panel.git   || git remote set-url origin https://github.com/Sid-Dev-alt/CPN_admin_panel.git 
+error: remote origin already exists.
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git branch -M main 
+
+c:\Users\sidk4\work_Docs\DW\cpn foods\cpn-admin>git push -f origin main 
+To https://github.com/Sid-Dev-alt/CPN_admin_panel.git
+ * [new branch]      main -> main
