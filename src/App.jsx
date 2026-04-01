@@ -3,7 +3,7 @@ import axios from 'axios';
 import { BiTrash, BiPlus } from 'react-icons/bi';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://cpnbackend-production.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://cpn-backend-xmcl.onrender.com';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -19,7 +19,7 @@ function App() {
       { weightLabel: '500g', price: 0 }
     ]
   });
-  
+
   const [errors, setErrors] = useState({});
 
   const fetchProducts = async () => {
@@ -96,12 +96,12 @@ function App() {
     if (!formData.name.trim()) newErrors.name = "Product name is required.";
     if (!formData.description.trim()) newErrors.description = "Product description is required.";
     if (!formData.imageUrl) newErrors.imageUrl = "An image must be uploaded.";
-    
+
     formData.variants.forEach((v, i) => {
       if (!v.weightLabel.trim()) newErrors[`weightLabel_${i}`] = "Required";
       if (v.price <= 0) newErrors[`price_${i}`] = "Invalid";
     });
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -109,7 +109,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     try {
       await axios.post(`${API_URL}/api/v1/masalas`, formData);
       alert('Product created successfully!');
@@ -152,7 +152,7 @@ function App() {
 
       <div className="container-fluid">
         <div className="row g-4">
-          
+
           {/* Add Form */}
           <div className="col-12 col-xl-5">
             <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
@@ -161,24 +161,24 @@ function App() {
               </div>
               <div className="card-body p-4 bg-white">
                 <form onSubmit={handleSubmit} noValidate>
-                  
+
                   <div className="mb-3">
                     <label className="form-label fw-bold small text-muted">Product Name <span className="text-danger">*</span></label>
-                    <input type="text" className={`form-control border-0 bg-light ${errors.name ? 'is-invalid' : ''}`} placeholder="e.g. Garam Masala" value={formData.name} onChange={e => {setFormData({...formData, name: e.target.value}); if(errors.name) setErrors({...errors, name: null});}} />
+                    <input type="text" className={`form-control border-0 bg-light ${errors.name ? 'is-invalid' : ''}`} placeholder="e.g. Garam Masala" value={formData.name} onChange={e => { setFormData({ ...formData, name: e.target.value }); if (errors.name) setErrors({ ...errors, name: null }); }} />
                     {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                   </div>
-                  
+
                   <div className="mb-3">
                     <label className="form-label fw-bold small text-muted">Subtitle (Optional)</label>
-                    <input type="text" className="form-control border-0 bg-light" placeholder="e.g. Authentic Spice Mix" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} />
+                    <input type="text" className="form-control border-0 bg-light" placeholder="e.g. Authentic Spice Mix" value={formData.subtitle} onChange={e => setFormData({ ...formData, subtitle: e.target.value })} />
                   </div>
-                  
+
                   <div className="mb-3">
                     <label className="form-label fw-bold small text-muted">Description <span className="text-danger">*</span></label>
-                    <textarea className={`form-control border-0 bg-light ${errors.description ? 'is-invalid' : ''}`} rows="3" placeholder="Describe the flavors..." value={formData.description} onChange={e => {setFormData({...formData, description: e.target.value}); if(errors.description) setErrors({...errors, description: null});}}></textarea>
+                    <textarea className={`form-control border-0 bg-light ${errors.description ? 'is-invalid' : ''}`} rows="3" placeholder="Describe the flavors..." value={formData.description} onChange={e => { setFormData({ ...formData, description: e.target.value }); if (errors.description) setErrors({ ...errors, description: null }); }}></textarea>
                     {errors.description && <div className="invalid-feedback">{errors.description}</div>}
                   </div>
-                  
+
                   <div className="mb-4">
                     <label className="form-label fw-bold small text-muted">Upload Image <span className="text-danger">*</span></label>
                     <input id="imageUploader" type="file" accept="image/*" className={`form-control border-0 bg-light ${errors.imageUrl ? 'is-invalid' : ''}`} onChange={handleImageUpload} />
