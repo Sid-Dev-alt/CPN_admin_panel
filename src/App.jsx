@@ -110,8 +110,14 @@ function App() {
     e.preventDefault();
     if (!validateForm()) return;
 
+    // Transform idealWith to expected object format for the backend mapping
+    const payload = {
+      ...formData,
+      idealWith: formData.idealWith.map(meal => ({ mealType: meal }))
+    };
+
     try {
-      await axios.post(`${API_URL}/api/v1/masalas`, formData);
+      await axios.post(`${API_URL}/api/v1/masalas`, payload);
       alert('Product created successfully!');
       fetchProducts();
       setFormData({
