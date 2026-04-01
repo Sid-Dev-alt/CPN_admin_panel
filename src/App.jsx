@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { BiTrash, BiPlus } from 'react-icons/bi';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://cpnbackend-production.up.railway.app';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -11,15 +14,17 @@ function App() {
     imageUrl: '',
     tasteProfile: { sweet: 0, sour: 0, tangy: 0, spice: 0 },
     idealWith: [],
-    variants: [{ weightLabel: '500g', price: 0 }]
+    variants: [
+      { weightLabel: '250g', price: 0 },
+      { weightLabel: '500g', price: 0 }
+    ]
   });
   
-  // Custom error state
   const [errors, setErrors] = useState({});
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/v1/masalas');
+      const res = await axios.get(`${API_URL}/api/v1/masalas`);
       setProducts(res.data);
     } catch (e) {
       console.error(e);
@@ -52,11 +57,37 @@ function App() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({ ...prev, imageUrl: reader.result }));
-        setErrors(prev => ({ ...prev, imageUrl: null })); // clear image error
+        setErrors(prev => ({ ...prev, imageUrl: null }));
       };
       reader.readAsDataURL(file);
     } else {
       setFormData(prev => ({ ...prev, imageUrl: '' }));
+    }
+  };
+
+  const handleAddVariant = () => {
+    setFormData(prev => ({
+      ...prev,
+      variants: [...prev.variants, { weightLabel: '', price: 0 }]
+    }));
+  };
+
+  const handleRemoveVariant = (index) => {
+    if (formData.variants.length <= 1) return;
+    const newVariants = [...formData.variants];
+    newVariants.splice(index, 1);
+    setFormData(prev => ({ ...prev, variants: newVariants }));
+  };
+
+  const handleVariantChange = (index, field, value) => {
+    const newVariants = [...formData.variants];
+    newVariants[index][field] = field === 'price' ? Number(value) : value;
+    setFormData(prev => ({ ...prev, variants: newVariants }));
+    // Clear error for this field
+    if (errors[`${field}_${index}`]) {
+      const newErrors = { ...errors };
+      delete newErrors[`${field}_${index}`];
+      setErrors(newErrors);
     }
   };
 
@@ -65,8 +96,11 @@ function App() {
     if (!formData.name.trim()) newErrors.name = "Product name is required.";
     if (!formData.description.trim()) newErrors.description = "Product description is required.";
     if (!formData.imageUrl) newErrors.imageUrl = "An image must be uploaded.";
-    if (!formData.variants[0].weightLabel.trim()) newErrors.weight = "Default weight label is required.";
-    if (formData.variants[0].price <= 0) newErrors.price = "A valid price is required.";
+    
+    formData.variants.forEach((v, i) => {
+      if (!v.weightLabel.trim()) newErrors[`weightLabel_${i}`] = "Required";
+      if (v.price <= 0) newErrors[`price_${i}`] = "Invalid";
+    });
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -74,32 +108,35 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
     
     try {
-      await axios.post('http://localhost:8080/api/v1/masalas', formData);
+      await axios.post(`${API_URL}/api/v1/masalas`, formData);
       alert('Product created successfully!');
       fetchProducts();
       setFormData({
         name: '', subtitle: '', description: '', imageUrl: '',
         tasteProfile: { sweet: 0, sour: 0, tangy: 0, spice: 0 },
-        idealWith: [], variants: [{ weightLabel: '500g', price: 0 }]
+        idealWith: [],
+        variants: [
+          { weightLabel: '250g', price: 0 },
+          { weightLabel: '500g', price: 0 }
+        ]
       });
-      document.getElementById('imageUploader').value = '';
+      if (document.getElementById('imageUploader')) {
+        document.getElementById('imageUploader').value = '';
+      }
       setErrors({});
     } catch (error) {
       console.error(error);
-      alert('Error saving product! Check connection.');
+      alert('Error saving product!');
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
-      await axios.delete(`http://localhost:8080/api/v1/masalas/${id}`);
+      await axios.delete(`${API_URL}/api/v1/masalas/${id}`);
       fetchProducts();
     } catch (error) {
       console.error(error);
@@ -108,92 +145,100 @@ function App() {
   };
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
-      <nav className="navbar navbar-dark bg-dark shadow-sm px-4 mb-4">
+    <div className="bg-light min-vh-100 pb-5 px-3">
+      <nav className="navbar navbar-dark bg-dark shadow-sm px-4 mb-4 rounded-bottom-4">
         <span className="navbar-brand fw-bold mb-0 h1">CPN Foods Admin Panel</span>
-
       </nav>
 
-      {/* Expanded fluid container for full width */}
-      <div className="container-fluid px-3 px-xl-5">
+      <div className="container-fluid">
         <div className="row g-4">
           
           {/* Add Form */}
-          <div className="col-12 col-xl-5 mb-5 mb-xl-0">
-            <div className="card shadow border-0 rounded-4">
-              <div className="card-header bg-primary text-white py-3 border-0 rounded-top-4">
+          <div className="col-12 col-xl-5">
+            <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
+              <div className="card-header bg-danger text-white py-3 border-0">
                 <h5 className="m-0 fw-bold">Publish New Product</h5>
               </div>
-              <div className="card-body p-4">
+              <div className="card-body p-4 bg-white">
                 <form onSubmit={handleSubmit} noValidate>
                   
-                  {/* Name */}
                   <div className="mb-3">
                     <label className="form-label fw-bold small text-muted">Product Name <span className="text-danger">*</span></label>
-                    <input type="text" className={`form-control bg-light ${errors.name ? 'is-invalid' : ''}`} value={formData.name} onChange={e => {setFormData({...formData, name: e.target.value}); setErrors({...errors, name: null});}} />
-                    {errors.name && <div className="invalid-feedback fw-bold">{errors.name}</div>}
+                    <input type="text" className={`form-control border-0 bg-light ${errors.name ? 'is-invalid' : ''}`} placeholder="e.g. Garam Masala" value={formData.name} onChange={e => {setFormData({...formData, name: e.target.value}); if(errors.name) setErrors({...errors, name: null});}} />
+                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                   </div>
                   
-                  {/* Subtitle */}
                   <div className="mb-3">
                     <label className="form-label fw-bold small text-muted">Subtitle (Optional)</label>
-                    <input type="text" className="form-control bg-light" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} />
+                    <input type="text" className="form-control border-0 bg-light" placeholder="e.g. Authentic Spice Mix" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} />
                   </div>
                   
-                  {/* Description */}
                   <div className="mb-3">
                     <label className="form-label fw-bold small text-muted">Description <span className="text-danger">*</span></label>
-                    <textarea className={`form-control bg-light ${errors.description ? 'is-invalid' : ''}`} rows="3" value={formData.description} onChange={e => {setFormData({...formData, description: e.target.value}); setErrors({...errors, description: null});}}></textarea>
-                    {errors.description && <div className="invalid-feedback fw-bold">{errors.description}</div>}
+                    <textarea className={`form-control border-0 bg-light ${errors.description ? 'is-invalid' : ''}`} rows="3" placeholder="Describe the flavors..." value={formData.description} onChange={e => {setFormData({...formData, description: e.target.value}); if(errors.description) setErrors({...errors, description: null});}}></textarea>
+                    {errors.description && <div className="invalid-feedback">{errors.description}</div>}
                   </div>
                   
-                  {/* Image Upload */}
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-muted">Upload Image File <span className="text-danger">*</span></label>
-                    <input id="imageUploader" type="file" accept="image/*" className={`form-control bg-light ${errors.imageUrl ? 'is-invalid' : ''}`} onChange={handleImageUpload} />
-                    {errors.imageUrl && <div className="invalid-feedback fw-bold">{errors.imageUrl}</div>}
-                    {formData.imageUrl && <div className="mt-3"><img src={formData.imageUrl} alt="Preview" className="shadow-sm" style={{maxHeight:'120px', borderRadius:'8px', border: '1px solid #dee2e6'}}/></div>}
+                    <label className="form-label fw-bold small text-muted">Upload Image <span className="text-danger">*</span></label>
+                    <input id="imageUploader" type="file" accept="image/*" className={`form-control border-0 bg-light ${errors.imageUrl ? 'is-invalid' : ''}`} onChange={handleImageUpload} />
+                    {errors.imageUrl && <div className="invalid-feedback d-block">{errors.imageUrl}</div>}
                   </div>
 
-                  <h6 className="fw-bold mb-3 border-bottom pb-2 mt-4 text-primary">Taste Profile</h6>
+                  <h6 className="fw-bold mb-3 border-bottom pb-2 mt-4 text-danger">Taste Profile</h6>
                   <div className="row g-3 mb-4">
                     {['sweet', 'sour', 'tangy', 'spice'].map(taste => (
                       <div className="col-6" key={taste}>
                         <label className="form-label text-capitalize small fw-bold text-muted">{taste} (0-5)</label>
                         <div className="d-flex align-items-center">
                           <input type="range" className="form-range flex-grow-1 me-2" min="0" max="5" value={formData.tasteProfile[taste]} onChange={e => handleTasteChange(e.target.value, taste)} />
-                          <span className="badge bg-secondary">{formData.tasteProfile[taste]}</span>
+                          <span className="badge bg-danger">{formData.tasteProfile[taste]}</span>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <h6 className="fw-bold mb-3 border-bottom pb-2 text-primary">Ideal With (Multi-select)</h6>
+                  <h6 className="fw-bold mb-3 border-bottom pb-2 text-danger">Ideal With</h6>
                   <div className="mb-4 d-flex flex-wrap gap-3">
                     {['BREAKFAST', 'LUNCH_DINNER', 'SNACK'].map(meal => (
-                      <div className="form-check form-switch" key={meal}>
-                        <input className="form-check-input cursor-pointer" type="checkbox" id={`meal-${meal}`} checked={formData.idealWith.includes(meal)} onChange={() => handleMealChange(meal)} />
-                        <label className="form-check-label text-capitalize small fw-medium cursor-pointer" htmlFor={`meal-${meal}`}>{meal.toLowerCase().replace('_', ' / ')}</label>
+                      <div className="form-check form-switch col-auto" key={meal}>
+                        <input className="form-check-input" type="checkbox" id={`meal-${meal}`} checked={formData.idealWith.includes(meal)} onChange={() => handleMealChange(meal)} />
+                        <label className="form-check-label text-capitalize small fw-medium" htmlFor={`meal-${meal}`}>{meal.toLowerCase().replace('_', ' / ')}</label>
                       </div>
                     ))}
                   </div>
 
-                  <h6 className="fw-bold mb-3 border-bottom pb-2 text-primary">Pricing Variant (Default)</h6>
-                  <div className="row g-3 mb-5">
-                    <div className="col-6">
-                      <label className="form-label small fw-bold text-muted">Weight Label <span className="text-danger">*</span></label>
-                      <input type="text" className={`form-control bg-light ${errors.weight ? 'is-invalid' : ''}`} placeholder="e.g. 500g" value={formData.variants[0].weightLabel} onChange={e => {setFormData({ ...formData, variants: [{ ...formData.variants[0], weightLabel: e.target.value }] }); setErrors({...errors, weight: null});}} />
-                      {errors.weight && <div className="invalid-feedback fw-bold">{errors.weight}</div>}
-                    </div>
-                    <div className="col-6">
-                      <label className="form-label small fw-bold text-muted">Price (₹) <span className="text-danger">*</span></label>
-                      <input type="number" min="0" className={`form-control bg-light ${errors.price ? 'is-invalid' : ''}`} placeholder="350" value={formData.variants[0].price || ''} onChange={e => {setFormData({ ...formData, variants: [{ ...formData.variants[0], price: Number(e.target.value) }] }); setErrors({...errors, price: null});}} />
-                      {errors.price && <div className="invalid-feedback fw-bold">{errors.price}</div>}
-                    </div>
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h6 className="fw-bold m-0 text-danger">Pricing Variants</h6>
+                    <button type="button" className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 border-0 fw-bold" onClick={handleAddVariant}>
+                      <BiPlus /> Add Option
+                    </button>
                   </div>
 
-                  <button type="submit" className="btn btn-primary w-100 fw-bold py-3 shadow border-0 rounded-3 fs-5" style={{ background: 'linear-gradient(90deg, #0d6efd, #0b5ed7)' }}>
-                    Confirm
+                  <div className="variant-list">
+                    {formData.variants.map((variant, index) => (
+                      <div key={index} className="row g-2 mb-3 align-items-end p-3 border-0 bg-light rounded-3 mx-0 position-relative shadow-sm transition-all hover-shadow">
+                        {formData.variants.length > 1 && (
+                          <button type="button" className="btn btn-link link-danger p-0 position-absolute" style={{ top: '8px', right: '12px', width: 'auto', textDecoration: 'none' }} onClick={() => handleRemoveVariant(index)}>
+                            <BiTrash size={18} />
+                          </button>
+                        )}
+                        <div className="col-6">
+                          <label className="form-label small fw-bold text-muted mb-1">Weight Label</label>
+                          <input type="text" className={`form-control form-control-sm border-0 ${errors[`weightLabel_${index}`] ? 'is-invalid border border-danger' : ''}`} placeholder="e.g. 250g" value={variant.weightLabel} onChange={e => handleVariantChange(index, 'weightLabel', e.target.value)} />
+                          {errors[`weightLabel_${index}`] && <div className="invalid-feedback small">{errors[`weightLabel_${index}`]}</div>}
+                        </div>
+                        <div className="col-5">
+                          <label className="form-label small fw-bold text-muted mb-1">Price (₹)</label>
+                          <input type="number" className={`form-control form-control-sm border-0 ${errors[`price_${index}`] ? 'is-invalid border border-danger' : ''}`} placeholder="100" value={variant.price || ''} onChange={e => handleVariantChange(index, 'price', e.target.value)} />
+                          {errors[`price_${index}`] && <div className="invalid-feedback small">{errors[`price_${index}`]}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button type="submit" className="btn btn-danger w-100 fw-bold py-3 shadow border-0 rounded-3 mt-4 fs-5" style={{ background: 'linear-gradient(90deg, #ea0000, #c90000)' }}>
+                    Confirm & Publish Product
                   </button>
                 </form>
               </div>
@@ -201,48 +246,45 @@ function App() {
           </div>
 
           {/* Database Viewer */}
-          <div className="col-12 col-xl-7 ps-xl-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h4 className="fw-bold m-0 text-dark">Products</h4>
-              {/* <span className="badge bg-dark rounded-pill fs-6 px-3 py-2 shadow-sm">{products.length} Total</span> */}
-            </div>
-            
-            <div className="row g-3">
-              {products.map(p => (
-                <div className="col-12 col-xxl-6" key={p.id}>
-                  <div className="card shadow-sm border border-light overflow-hidden h-100 rounded-4">
-                    <div className="row g-0 h-100">
-                      <div className="col-4 bg-light d-flex align-items-center justify-content-center p-3 border-end">
-                        <img src={p.imageUrl} className="img-fluid" style={{ maxHeight: '110px', objectFit: 'contain' }} alt={p.name} />
-                      </div>
-                      <div className="col-8 p-3 d-flex flex-column">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <h6 className="fw-bold text-dark m-0">{p.name}</h6>
-                          <button onClick={() => handleDelete(p.id)} className="btn btn-sm  btn-outline-danger shadow-sm rounded-1 p-1 px-2 border-0" title="Delete Product">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash3-fill" viewBox="0 0 16 16">
-                              <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                          </button>
-                        </div>
-                        <p className="small text-muted mb-3 lh-sm" style={{flex: 1}}>{p.subtitle || 'No subtitle provided'}</p>
-                        <div className="d-flex align-items-center gap-2 mt-auto">
-                          <span className="badge bg-danger shadow-sm">Spice: {p.tasteProfile?.spice || 0}/5</span>
-                          <span className="badge bg-success shadow-sm">₹{p.variants?.[0]?.price || 0}</span>
+          <div className="col-12 col-xl-7">
+            <div className="card border-0 shadow-lg rounded-4 bg-white h-100">
+              <div className="card-header bg-dark text-white py-3 border-0">
+                <h5 className="m-0 fw-bold">Live Products Database</h5>
+              </div>
+              <div className="card-body p-4">
+                <div className="row g-3">
+                  {products.map(p => (
+                    <div className="col-12 col-md-6" key={p.id}>
+                      <div className="card shadow-sm border-0 overflow-hidden h-100 rounded-4 bg-light hover-shadow transition-all">
+                        <div className="row g-0 h-100">
+                          <div className="col-4 d-flex align-items-center justify-content-center p-2 bg-white">
+                            <img src={p.imageUrl} className="img-fluid" style={{ maxHeight: '90px', objectFit: 'contain' }} alt={p.name} />
+                          </div>
+                          <div className="col-8 p-3 d-flex flex-column">
+                            <div className="d-flex justify-content-between align-items-start mb-1">
+                              <h6 className="fw-bold text-dark m-0">{p.name}</h6>
+                              <button onClick={() => handleDelete(p.id)} className="btn btn-sm btn-link link-danger p-0 border-0">
+                                <BiTrash />
+                              </button>
+                            </div>
+                            <p className="small text-muted mb-2 text-truncate">{p.subtitle}</p>
+                            <div className="d-flex flex-wrap gap-1 mt-auto">
+                              {p.variants?.map((v, i) => (
+                                <span key={i} className="badge bg-white text-danger border border-danger fw-normal" style={{ fontSize: '0.6rem' }}>{v.weightLabel}: ₹{v.price}</span>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
+                  {products.length === 0 && (
+                    <div className="text-center py-5">
+                      <p className="text-muted">No products found in the database.</p>
+                    </div>
+                  )}
                 </div>
-              ))}
-              
-              {products.length === 0 && (
-                <div className="col-12">
-                   <div className="alert alert-info border-0 shadow-sm rounded-4 text-center py-5">
-                     <h5 className="fw-bold mb-2">No Masalas in the Database</h5>
-                     <p className="text-secondary m-0">Use the panel on the left to add your very first product!</p>
-                   </div>
-                </div>
-              )}
+              </div>
             </div>
           </div>
 
