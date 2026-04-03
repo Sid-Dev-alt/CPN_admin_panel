@@ -21,13 +21,20 @@ function App() {
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
 
   const fetchProducts = async () => {
     try {
+      setIsLoading(true);
+      setFetchError(null);
       const res = await axios.get(`${API_URL}/api/v1/masalas`);
       setProducts(res.data);
     } catch (e) {
       console.error(e);
+      setFetchError("Failed to load products. Backend might be waking up or unavailable.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -259,7 +266,25 @@ function App() {
               </div>
               <div className="card-body p-4">
                 <div className="row g-3">
-                  {products.map(p => (
+                  {isLoading && (
+                    <div className="col-12 text-center py-5">
+                      <div className="spinner-border text-danger" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      <p className="text-muted mt-3 small">Fetching products... (May take up to 50 seconds on cold start)</p>
+                    </div>
+                  )}
+
+                  {fetchError && !isLoading && (
+                    <div className="col-12">
+                      <div className="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+                        <span>{fetchError}</span>
+                        <button className="btn btn-sm btn-danger" onClick={fetchProducts}>Retry</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {!isLoading && !fetchError && products.map(p => (
                     <div className="col-12 col-md-6" key={p.id}>
                       <div className="card shadow-sm border-0 overflow-hidden h-100 rounded-4 bg-light hover-shadow transition-all">
                         <div className="row g-0 h-100">
@@ -284,7 +309,7 @@ function App() {
                       </div>
                     </div>
                   ))}
-                  {products.length === 0 && (
+                  {!isLoading && !fetchError && products.length === 0 && (
                     <div className="text-center py-5">
                       <p className="text-muted">No products found in the database.</p>
                     </div>
